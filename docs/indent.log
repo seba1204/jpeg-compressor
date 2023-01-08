@@ -1,0 +1,34 @@
+INFO:  latexindent version 3.19, 2022-10-30, a script to indent .tex files
+       latexindent lives here: /usr/local/texlive/2022/texmf-dist/scripts/latexindent/
+       Sun Jan  8 16:56:50 2023
+       Filename: /home/chap/repos/mmf/jpeg-encoder/docs/src/part-00/__latexindent_temp_main.tex
+INFO:  Processing switches:
+       -y|--yaml: YAML settings specified via command line
+       -c|--cruft: cruft directory
+INFO:  Directory for backup files and /home/chap/repos/mmf/jpeg-encoder/docs//indent.log:
+       /home/chap/repos/mmf/jpeg-encoder/docs/
+INFO:  YAML settings read: defaultSettings.yaml
+       Reading defaultSettings.yaml from /usr/local/texlive/2022/texmf-dist/scripts/latexindent/defaultSettings.yaml
+INFO:  YAML settings read: indentconfig.yaml or .indentconfig.yaml
+       Reading path information from /home/chap/.indentconfig.yaml
+       (Alternatively /home/chap/indentconfig.yaml can be used)
+       ---
+       paths:
+         - /home/chap/.latexindent/settings.yaml
+
+INFO:  YAML settings, reading from the following files:
+WARN:  /home/chap/indentconfig.yaml
+       specifies /home/chap/.latexindent/settings.yaml but this file does not exist - unable to read settings from this file
+INFO:  YAML settings read: -y switch
+       YAML setting: defaultIndent:'    '
+       single-quoted string found in -y switch: '    ', substitute to     
+       Updating mainSettings with defaultIndent:     
+INFO:  Phase 1: searching for objects
+INFO:  Phase 2: finding surrounding indentation
+INFO:  Phase 3: indenting objects
+INFO:  Phase 4: final indentation check
+INFO:  Output routine:
+       Not outputting to file; see -w and -o switches for more options.
+       --------------
+INFO:  Please direct all communication/issues to:
+        https://github.com/cmhughes/latexindent.pl
