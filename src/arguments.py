@@ -1,7 +1,12 @@
 import argparse
-import os
-from src.constants import PROG_VERSION, DEFAULT_RATIO
 import logging
+import os
+from os.path import dirname, isdir, isfile
+from os.path import join as join_path
+
+import src.error_messages as em
+from src.constants import DEFAULT_RATIO, PROG_VERSION
+from src.helpers import fn_without_ext, is_image, join, replace_extension
 
 
 class Arguments:
@@ -11,7 +16,6 @@ class Arguments:
         self.version: str = PROG_VERSION
         self.ratio: float = 0.5
         self.input: list[str] = []
-        self.dangerous_input: list[str] = []
         self.output = None
         self.force: bool = False
         self.quiet: bool = False
@@ -71,57 +75,63 @@ def define_args() -> argparse.ArgumentParser:
 def get_in_out_files(args: argparse.Namespace) -> tuple[list[str], list[str]]:
     safe_input = []
     safe_output = []
+
     # check if there is an input file
     if not args.input:
-        raise ValueError(
-            "The input file must be set. Use -h or --help for more information.")
-
-    # check if the input file exists
-    if not os.path.isfile(args.input):
-        raise ValueError("The input file does not exist.")
-
+        raise ValueError(em.INPUT_FILE_MISSING)
     assert (args.input)
 
     # check if the input is a file or a directory.
     # if it is a directory, then loop through all the files in the directory and save path into a list
     # else create a list with one element
-    if os.path.isfile(args.input):
-        safe_input = [args.input]
-    elif os.path.isdir(args.input):
+    if isfile(args.input):
+        if is_image(args.input):
+            safe_input = [args.input]
+        else:
+            raise ValueError(em.NOT_RECOCGNISED_IMAGE_FORMAT)
+    elif isdir(args.input):
         paths = os.listdir(args.input)
-        # for each path in the directory, check if it is an image (jpg, jpeg, png, bmp, tiff, gif, webp, CR2)
-        for path in paths:
-            if os.path.isfile(path):
-                if path.endswith((".jpg", ".jpeg", ".png", ".bmp", ".tiff", ".gif", ".webp", ".CR2")):
-                    safe_input.append(path)
+        for img_path in paths:
+            full_path = join_path(args.input, img_path)
+            if isfile(full_path):
+                if is_image(full_path):
+                    safe_input.append(full_path)
+        if not safe_input:
+            raise ValueError(em.NO_IMG_RECOGNIZED_IN_DIRECTORY)
     else:
-        raise ValueError(
-            "The input file is not a file or a directory ¯\_(ツ)_/¯")
+        raise ValueError(em.INPUT_FILE_NOT_A_FILE_OR_A_DIRECTORY)
 
-    # check if there is an output
+    # SET OUTPUT FILES ---------------------------------------------------------
     if not args.output:
-        # if not, the output is the same as the input
-        safe_output = safe_input
+        safe_output = [replace_extension(file, ".jpg") for file in safe_input]
     else:
         # if there is an output, check if it is the same as the input
         # if input is a directory, the output must be a directory too
         # if input is a file, the output can be a file or a directory
-        if os.path.isdir(args.input):
-            if os.path.isdir(args.output):
+        if isdir(args.input):
+            if isfile(args.output):
+                raise ValueError(em.INPUT_IS_DIRECTORY_BUT_OUTPUT_IS_FILE)
+            else:
+                # check if the output directory exists
+                if not isdir(args.output):
+                    os.makedirs(args.output)
                 # for each input file, create a path to the output file
                 for input_file in safe_input:
                     # get the input file name
-                    input_file_name = os.path.basename(input_file)
+                    input_fn_without_ext = fn_without_ext(input_file)
+                    # create the output file path
                     safe_output.append(
-                        os.path.join(args.output, input_file_name))
-            else:
-                raise ValueError(
-                    "The input is a directory, the output must be a directory too. Else, all output except the last one will be overwritten.")
+                        join_path(args.output, input_fn_without_ext + ".jpg"))
+
         else:
-            if os.path.isdir(args.output):
-                input_file_name = os.path.basename(safe_input[0])
-                safe_output = [os.path.join(args.output, input_file_name)]
+            if isdir(args.output):
+                input_fn_without_ext = fn_without_ext(args.input)
+                input_file_name = input_fn_without_ext + ".jpg"
+                safe_output = [join_path(args.output, input_file_name)]
             else:
+                # check if the output file ends with .jpg
+                if not args.output.endswith(".jpg"):
+                    raise ValueError(em.OUTPUT_FILE_MUST_END_WITH_JPG)
                 safe_output = [args.output]
 
     assert (len(safe_input) == len(safe_output))
@@ -138,28 +148,55 @@ def get_ratio(args: argparse.Namespace) -> float:
     else:
         ratio = args.ratio
         if ratio < 0 or ratio > 1:
-            raise ValueError(
-                "The ratio (" + str(ratio) + ") must be between 0 and 1. Use -h or --help for more information.")
+            raise ValueError(em.RATIO_OUT_OF_BOUNDS, ratio)
         else:
             return ratio
 
 
-def check_safe_ouput(safe_args: Arguments, logger: logging.Logger) -> None:
+def check_safe_ouput(safe_args: Arguments, logger: logging.Logger) -> int:
     # check if the output file exists
     unsafe_output = []
     for output_file in safe_args.output:
-        if os.path.isfile(output_file):
-            unsafe_output.append(output_file)
+        if isfile(output_file):
+            # if it ends with .jpg or .jpeg, then add it to the list
+            if output_file.endswith((".jpg", ".jpeg")):
+                unsafe_output.append(output_file)
 
     if len(unsafe_output) > 0:
         if len(unsafe_output) > 1:
-            message = unsafe_output.join(", ") + " already exist."
+            message = join(unsafe_output, ", ") + em.ALREADY_EXIST
         else:
-            message = unsafe_output[0] + " already exists."
+            message = unsafe_output[0] + em.ALREADY_EXISTS
+
         if safe_args.force:
-            logger.warning(message + " Overwriting...")
+            logger.warning(message + em.OVERWRITING)
+            return 0
         else:
-            raise ValueError(message + " Use -f or --force to overwrite it.")
+            logger.error(
+                message + em.NO_OUTPUT_BUT_OVERWRITE_NOT_SET)
+            return 1
+    else:
+        return 0
+
+
+def log_args(args: Arguments) -> str:
+    inputs = join(args.input, "\n----")
+    outputs = join(args.output, "\n----")
+    ratio = str(args.ratio)
+    force = str(args.force)
+    quiet = str(args.quiet)
+    debug = str(args.debug)
+    test = str(args.test)
+    compare = str(args.compare)
+
+    return "\n--Input: " + inputs + "\n" + \
+        "--Output: " + outputs + "\n" + \
+        "--Ratio: " + ratio + "\n" + \
+        "--Force: " + force + "\n" + \
+        "--Quiet: " + quiet + "\n" + \
+        "--Debug: " + debug + "\n" + \
+        "--Test: " + test + "\n" + \
+        "--Compare: " + compare + "\n"
 
 
 def check_args(args: argparse.Namespace) -> Arguments:
