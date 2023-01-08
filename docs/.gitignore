@@ -1,0 +1,30 @@
+# all latex generated files
+*.aux
+*.bbl
+*.blg
+*.dvi
+*.idx
+*.ilg
+*.ind
+*.lof
+*.log
+*.lot
+*.out
+*.toc
+*.acn
+*.acr
+*.alg
+*.glg
+*.glo
+*.gls
+*.ist
+*.fls
+*.fdb_latexmk
+*.synctex.gz
+*.synctex(busy)
+*.synctex.gz(busy)
+
+_minted*
+
+# all pdf files
+*.pdf

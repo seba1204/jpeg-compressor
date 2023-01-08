@@ -1,5 +1,0 @@
-\babel@toc {english}{}\relax 
-\contentsline {section}{\numberline {0}Introduction}{2}{section.0}%
-\contentsline {subsection}{\numberline {0.1}Authors}{2}{subsection.0.1}%
-\contentsline {subsection}{\numberline {0.2}Context}{2}{subsection.0.2}%
-\contentsline {subsection}{\numberline {0.3}Project structure}{2}{subsection.0.3}%
