@@ -11,11 +11,20 @@
             "program": "main.py",
             "args": [
                 "-i",
-                "assets/tests.png",
+                "assets/head.jpg",
                 "-o",
                 "out/",
-                "-d"
+                "-d",
+                "-f"
             ],
+            "console": "integratedTerminal",
+            "justMyCode": true
+        },
+        {
+            "name": "Python: Current File",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
             "console": "integratedTerminal",
             "justMyCode": true
         }

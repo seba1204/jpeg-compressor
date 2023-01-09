@@ -1,4 +1,5 @@
 from lib.compressor import compress
+from lib.decompressor import JPEG
 from src.arguments import check_safe_ouput, log_args, parse_args
 from src.logger import set_logger
 

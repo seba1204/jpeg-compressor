@@ -36,3 +36,7 @@ def dct2(block: np.ndarray) -> np.ndarray:
 
 def dct(block: np.ndarray) -> np.ndarray:
     return cv2.dct(block.astype(np.float32))
+
+
+def idct(block: np.ndarray) -> np.ndarray:
+    return cv2.idct(block.astype(np.float32))
