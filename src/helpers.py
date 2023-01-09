@@ -95,13 +95,18 @@ def display(disps, options):
                         out_path + disp.name + ".png",
                         disp.data, cmap=disp.cmap
                     )
+                else:
+                    plt.imsave(
+                        out_path + disp.name + ".png",
+                        disp.data
+                    )
 
 
-def display_rgb(r, g, b, options):
+def display_rgb(r, g, b, options, ext=None):
     """Display the image, and 3 channels"""
-    r = Displayable(r, "Reds", "red")
-    g = Displayable(g, "Greens", "green")
-    b = Displayable(b, "Blues", "blue")
+    r = Displayable(r, "Reds", "red", ext)
+    g = Displayable(g, "Greens", "green", ext)
+    b = Displayable(b, "Blues", "blue", ext)
 
     display([r, g, b], options)
 
@@ -113,6 +118,20 @@ def display_ycbcr(y, cb, cr, options, ext=None):
     cr = Displayable(cr, "gray", "Cr", ext)
 
     display([y, cb, cr], options)
+
+
+def display_results(r, g, b, options, ext=None):
+    """Display the output"""
+    r = Displayable(r, "Reds", "red", ext)
+    g = Displayable(g, "Greens", "green", ext)
+    b = Displayable(b, "Blues", "blue", ext)
+
+    options["img"] = None
+
+    merged = Displayable(
+        np.dstack((r.data, g.data, b.data)), None, "reconstructed")
+
+    display([merged, r, g, b], options)
 
 
 def split_rgb(img) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
@@ -139,3 +158,32 @@ def pad(img: np.ndarray, padding: int) -> np.ndarray:
     padded_img = np.pad(img, ((0, h_pad), (0, w_pad)), 'constant')
 
     return padded_img
+
+
+def unpad(img: np.ndarray, padding: int) -> np.ndarray:
+    """Unpad the image"""
+    # get the shape of the image
+    h, w = img.shape
+
+    # calculate the padding
+    h_pad = padding - (h % padding)
+    w_pad = padding - (w % padding)
+
+    # unpad the image
+    unpadded_img = img[:h - h_pad, :w - w_pad]
+
+    return unpadded_img
+
+
+def log(data, name, i, j, logger, options):
+    """Log a message"""
+    if options["debug"]:
+        if (i == 0 and j == 0):
+            if (isinstance(data, list)):
+                msg = "\n\t" + name + ":\n"
+                msg += "\tShape: " + str(len(data)) + "\n"
+                # show the first 10 elements
+                msg += "\tData: " + str(data[:10])
+            else:
+                msg = "Data: " + str(data) + "\n"
+            logger.debug(msg)
