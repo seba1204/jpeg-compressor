@@ -42,6 +42,7 @@ def set_logger(args: Arguments) -> logging.Logger:
 
     # set the logger
     logger = logging.getLogger()
+    logger.propagate = False
     log_level = get_log_level(args)
     logger.setLevel(log_level)
 
@@ -52,5 +53,10 @@ def set_logger(args: Arguments) -> logging.Logger:
     console_handler.setLevel(log_level)
     console_handler.setFormatter(formatter)
     logger.addHandler(console_handler)
+
+    # disable the logger of the matplotlib module
+    logging.getLogger('matplotlib').setLevel(logging.WARNING)
+    # disable the logger of the PIL module
+    logging.getLogger('PIL').setLevel(logging.WARNING)
 
     return logger

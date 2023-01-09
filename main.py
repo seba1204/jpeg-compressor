@@ -1,3 +1,4 @@
+from lib.compressor import compress
 from src.arguments import check_safe_ouput, log_args, parse_args
 from src.logger import set_logger
 
@@ -22,6 +23,10 @@ def main():
     if args.test:
         # TODO: create and run the test suite
         return
+
+    # for each input file, compress it
+    for i in range(len(args.input)):
+        compress(args.input[i], args.output[i], args, logger)
 
 
 if __name__ == "__main__":

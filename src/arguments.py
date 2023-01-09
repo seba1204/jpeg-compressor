@@ -196,7 +196,7 @@ def log_args(args: Arguments) -> str:
         "--Quiet: " + quiet + "\n" + \
         "--Debug: " + debug + "\n" + \
         "--Test: " + test + "\n" + \
-        "--Compare: " + compare + "\n"
+        "--Compare: " + compare
 
 
 def check_args(args: argparse.Namespace) -> Arguments:
