@@ -63,14 +63,19 @@ def compress(input_file, output_file, args, logger):
     display_ycbcr(y, Cb, Cr, options)
 
     logger.debug("downsample Cb and Cr channels")
-    Cb = Cb[::2, ::2]
-    Cr = Cr[::2, ::2]
+    # downsample by 2 Cb and Cr by taking only one pixel every 2x2 pixels
+    Cb_d = np.zeros((height // 2, width // 2), dtype=int)
+    Cr_d = np.zeros((height // 2, width // 2), dtype=int)
+    for i in range(0, height, 2):
+        for j in range(0, width, 2):
+            Cb_d[i // 2, j // 2] = Cb[i, j]
+            Cr_d[i // 2, j // 2] = Cr[i, j]
 
-    display_ycbcr(y, Cb, Cr, options, ext="downsampled")
+    display_ycbcr(y, Cb_d, Cr_d, options, ext="downsampled")
 
     logger.debug("compute DCT for each channel")
 
-    input = [y, Cb, Cr]
+    input = [y, Cb_d, Cr_d]
     results = [
         np.zeros((height, width), dtype=int),
         np.zeros((height // 2, width // 2), dtype=int),

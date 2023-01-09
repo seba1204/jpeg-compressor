@@ -11,11 +11,13 @@
             "program": "main.py",
             "args": [
                 "-i",
-                "assets/head.jpg",
+                "assets/tests.png",
                 "-o",
                 "out/",
                 "-d",
-                "-f"
+                "-f",
+                "-r",
+                "0.98"
             ],
             "console": "integratedTerminal",
             "justMyCode": true

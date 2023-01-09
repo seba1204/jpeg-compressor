@@ -1,0 +1,34 @@
+\subsection{Decompression}
+
+It is basically all the previous steps reversed :
+
+\cFF{src/part-03/assets/decompression.py}{Decompression}{decompression}
+We need to remove the potential padding that we added.
+We also need to clip the values to be between 0 and 255 when
+converting back to RGB.
+Now we can display the result to see if we loose information.
+
+
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}[t]{0.4\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{src/assets/tests/tests.png}
+        \caption{Original}
+        \label{fig:tests-or}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[t]{0.4\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{src/assets/tests/reconstructed.png}
+        \caption{Compressed (50\%)}
+        \label{fig:tests-com}
+    \end{subfigure}
+
+
+    \caption{Final result}
+    \label{fig:final}
+\end{figure}
+
+
+We don't see any obvious difference between the original and the compressed image.

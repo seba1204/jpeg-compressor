@@ -1,0 +1,16 @@
+├── assets    # all input images
+│   ├── tests.png
+│   └── tests.jpg
+├── docs      # relative to the report
+├── lib       # all interesting code about JPEG compression
+│   ├── compressor.py
+│   ├── decompressor.py
+│   ├── dct.py
+│   ├── run_length_encoding.py
+│   ├── quantization.py
+│   └── zigzag.py
+├── out       # all output images
+├── src       # python code to make it run
+│
+...
+└── main.py   # main file to run
