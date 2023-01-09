@@ -1,0 +1,12 @@
+USE_HELP = "Use --help for more information."
+INPUT_FILE_MISSING = "The input file is missing. " + USE_HELP
+INPUT_FILE_NOT_A_FILE_OR_A_DIRECTORY = "The input file is not a file or a directory. " + USE_HELP
+INPUT_IS_A_DIRECTORY_OUTPUT_MUST_BE_A_DIRECTORY_TOO = "The input is a directory, the output must be a directory too. Else, all output except the last one will be overwritten."
+OUTPUT_FILE_MUST_END_WITH_JPG = "The output file must end with .jpg. " + USE_HELP
+RATIO_OUT_OF_BOUNDS = "The ratio ({}) must be between 0 and 1. " + USE_HELP
+NOT_RECOCGNISED_IMAGE_FORMAT = "The image format is not recognised. " + USE_HELP
+NO_OUTPUT_BUT_OVERWRITE_NOT_SET = " Sepcify an output file with -o. " + USE_HELP
+OVERWRITING = " Overwriting..."
+NO_IMG_RECOGNIZED_IN_DIRECTORY = "No image recognized in the directory. " + USE_HELP
+ALREADY_EXISTS = " already exists. "
+ALREADY_EXIST = " already exist. "

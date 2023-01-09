@@ -1,73 +1,141 @@
-import cv2
+import os
+
+import matplotlib.pyplot as plt
 import numpy as np
-
-# open a RAW image
-# convert it to YCrCb channels
-# downsample Cb and Cr channels
-# compute DCT for each channel
-#   divide image in 8x8 blocks
-#   for each block compute DCT coefficients matrix
-#   quantize the matrix with a quantization table
+from PIL import Image
 
 
-def zigzag(matrix):
-    """Convert a matrix in zigzag vector"""
-    vector = []
-    for i in range(0, matrix.shape[0]):
-        for j in range(0, matrix.shape[1]):
-            if i % 2 == 0:
-                vector.append(matrix[i, j])
-            else:
-                vector.append(matrix[i, matrix.shape[1] - j - 1])
-    return vector
+def replace_extension(path: str, new_extension: str) -> str:
+    """Replace the extension of a file"""
+    return os.path.splitext(path)[0] + new_extension
 
 
-def run_length_encoding(vector):
-    """Run length encoding on a vector"""
-    rle = []
-    count = 1
-    for i in range(1, len(vector)):
-        if vector[i] == vector[i-1]:
-            count += 1
+def is_image(path: str) -> bool:
+    """Check if the file is an image"""
+    return path.endswith((".jpg", ".jpeg", ".png", ".bmp", ".tiff", ".gif", ".webp", ".CR2"))
+
+
+def join(iterator, seperator):
+    """Join an iterator with a seperator"""
+    it = map(str, iterator)
+    seperator = str(seperator)
+    string = next(it, '')
+    for s in it:
+        string += seperator + s
+    return string
+
+
+def fn_without_ext(path: str) -> str:
+    """Get the file name without extension"""
+    return os.path.splitext(os.path.basename(path))[0]
+
+
+def rgb2ycbcr(r: np.ndarray, g: np.ndarray, b: np.ndarray) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """Convert RGB to YCbCr"""
+    y = 0.299 * r + 0.587 * g + 0.114 * b
+    Cb = -0.1687 * r - 0.3313 * g + 0.5 * b + 128
+    Cr = 0.5 * r - 0.4187 * g - 0.0813 * b + 128
+    return y, Cb, Cr
+
+
+class Displayable:
+    data: np.ndarray
+    cmap: str
+    name: str
+
+    def __init__(self, data: np.ndarray = None, cmap: str = None, name: str = None, ext: str = None):
+        self.data = data
+        self.cmap = cmap
+        if ext is not None:
+            self.name = name + "_" + ext
         else:
-            rle.append((vector[i-1], count))
-            count = 1
-    rle.append((vector[-1], count))
-    return rle
+            self.name = name
 
 
-PATH = "src/lena.png"
-QUANTI_TABLE = [
-    [16, 11, 10, 16, 24, 40, 51, 61],
-    [12, 12, 14, 19, 26, 58, 60, 55],
-    [14, 13, 16, 24, 40, 57, 69, 56],
-    [14, 17, 22, 29, 51, 87, 80, 62],
-    [18, 22, 37, 56, 68, 109, 103, 77],
-    [24, 35, 55, 64, 81, 104, 113, 92],
-    [49, 64, 78, 87, 103, 121, 120, 101],
-    [72, 92, 95, 98, 112, 100, 103, 99]
-]
+def display(disps, options):
+    """Display the image, and 3 channels"""
+    # add options["igm"] at the begining of the disps list
+    if options["img"] is not None:
+        disps.insert(0, Displayable(options["img"], None, "Original"))
 
-# open image
-i = cv2.imread(PATH)
-Y, Cb, Cr = cv2.split(cv2.cvtColor(i, cv2.COLOR_BGR2YUV))   
+    n = len(disps)
 
-# downsample Cb and Cr channels
-Cb_down = cv2.resize(Cb, (0, 0), fx=0.5, fy=0.5, interpolation=cv2.INTER_AREA)
-Cr_down = cv2.resize(Cr, (0, 0), fx=0.5, fy=0.5, interpolation=cv2.INTER_AREA)
+    if options["show"]:
+        # find the number of subplots
+        nb_rows = int(np.ceil(np.sqrt(n)))
+        nb_cols = int(np.ceil(n / nb_rows))
 
-# compute DCT for each channel
-for channel in [Y, Cb_down, Cr_down]:
-    # divide image in 8x8 blocks
-    for i in range(0, channel.shape[0], 8):
-        for j in range(0, channel.shape[1], 8):
-            # for each block compute DCT coefficients matrix
-            dct = cv2.dct(channel[i:i+8, j:j+8])
-            # quantize the matrix with a quantization table
-            channel[i:i+8, j:j+8] = np.round(dct / QUANTI_TABLE)
-            # vectorize the matrix in zigzag
-            vector = zigzag(channel[i:i+8, j:j+8])
-            # run length encoding on this vector
-            vector = run_length_encoding(vector)
+        # create the figure
+        _, axs = plt.subplots(nb_rows, nb_cols, figsize=(10, 10))
+        axs = axs.flatten()
 
-# merge Y, Cb and Cr channels
+        # display each subplot
+        for i in range(n):
+            disp = disps[i]
+            axs[i].imshow(disp.data, cmap=disp.cmap)
+            axs[i].set_title(disp.name + " channel")
+            axs[i].axis('off')
+
+        plt.show()
+
+    if options["save"]:
+        output_file = options["output_file"]
+        # get file name without extension
+        output_filename = fn_without_ext(output_file)
+        out_path = os.path.dirname(output_file) + "/" + output_filename + "/"
+        if not os.path.exists(out_path):
+            os.makedirs(out_path)
+
+        # save each subplot to a file
+        for i in range(n):
+            disp = disps[i]
+            if disp.data is not None:
+                if disp.cmap is not None:
+                    plt.imsave(
+                        out_path + disp.name + ".png",
+                        disp.data, cmap=disp.cmap
+                    )
+
+
+def display_rgb(r, g, b, options):
+    """Display the image, and 3 channels"""
+    r = Displayable(r, "Reds", "red")
+    g = Displayable(g, "Greens", "green")
+    b = Displayable(b, "Blues", "blue")
+
+    display([r, g, b], options)
+
+
+def display_ycbcr(y, cb, cr, options, ext=None):
+    """Display the image, and 3 channels"""
+    y = Displayable(y, "gray", "Y", ext)
+    cb = Displayable(cb, "gray", "Cb", ext)
+    cr = Displayable(cr, "gray", "Cr", ext)
+
+    display([y, cb, cr], options)
+
+
+def split_rgb(img) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """Split the image into 3 channels"""
+    imgs = img.split()
+    # convert into numpy array
+    r = np.array(imgs[0])
+    g = np.array(imgs[1])
+    b = np.array(imgs[2])
+
+    return r, g, b
+
+
+def pad(img: np.ndarray, padding: int) -> np.ndarray:
+    """Pad the image with zeros to be a multiple of padding"""
+    # get the shape of the image
+    h, w = img.shape
+
+    # calculate the padding
+    h_pad = padding - (h % padding)
+    w_pad = padding - (w % padding)
+
+    # pad the image
+    padded_img = np.pad(img, ((0, h_pad), (0, w_pad)), 'constant')
+
+    return padded_img
