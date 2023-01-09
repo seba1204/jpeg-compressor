@@ -139,3 +139,17 @@ def pad(img: np.ndarray, padding: int) -> np.ndarray:
     padded_img = np.pad(img, ((0, h_pad), (0, w_pad)), 'constant')
 
     return padded_img
+
+
+def log(data, name, i, j, logger, options):
+    """Log a message"""
+    if options["debug"]:
+        if (i == 0 and j == 0):
+            if (isinstance(data, list)):
+                msg = "\n\t" + name + ":\n"
+                msg += "\tShape: " + str(len(data)) + "\n"
+                # show the first 10 elements
+                msg += "\tData: " + str(data[:10])
+            else:
+                msg = "Data: " + str(data) + "\n"
+            logger.debug(msg)
