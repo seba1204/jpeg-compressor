@@ -103,8 +103,10 @@ python-dotenv==0.19.2
 pyxattr==0.7.2
 PyYAML==5.4.1
 pyzmq==24.0.1
+rawpy==0.17.3
 reportlab==3.6.8
 requests==2.26.0
+scipy==1.10.0
 scour==0.38.2
 SecretStorage==3.3.1
 Send2Trash==1.8.0
@@ -114,6 +116,7 @@ soupsieve==2.3.1
 stack-data==0.6.0
 terminado==0.17.0
 tinycss2==1.2.1
+tk==0.1.0
 tomli==2.0.1
 tornado==6.2
 tqdm==4.64.1
